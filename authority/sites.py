@@ -1,10 +1,8 @@
-from inspect import getmembers, ismethod
+from inspect import getmembers, isfunction
 from django.db import models
 from django.db.models.base import ModelBase
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ImproperlyConfigured
-
-from authority.permissions import BasePermission
 
 
 class AlreadyRegistered(Exception):
@@ -50,7 +48,7 @@ class PermissionSite(object):
             return self._choices[model_cls]
         choices = [] + default
         for perm in self.get_permissions_by_model(model_cls):
-            for name, check in getmembers(perm, ismethod):
+            for name, check in getmembers(perm, isfunction):
                 if name in perm.checks:
                     signature = '%s.%s' % (perm.label, name)
                     label = getattr(check, 'short_description', signature)
@@ -59,6 +57,7 @@ class PermissionSite(object):
         return choices
 
     def register(self, model_or_iterable, permission_class=None, **options):
+        from authority.permissions import BasePermission
         if not permission_class:
             permission_class = BasePermission
 

@@ -6,7 +6,7 @@ from django.utils.safestring import mark_safe
 from django.forms.formsets import all_valid
 from django.contrib import admin
 from django.contrib.admin import helpers
-from django.contrib.contenttypes import generic
+from django.contrib.contenttypes.admin import GenericTabularInline
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import PermissionDenied
 
@@ -25,7 +25,7 @@ from authority.widgets import GenericForeignKeyRawIdWidget
 from authority import get_choices_for
 
 
-class PermissionInline(generic.GenericTabularInline):
+class PermissionInline(GenericTabularInline):
     model = Permission
     raw_id_fields = ('user', 'group', 'creator')
     extra = 1
@@ -85,7 +85,6 @@ def edit_permissions(modeladmin, request, queryset):
         inline_admin_formsets.append(inline_admin_formset)
         media = media + inline_admin_formset.media
 
-    ordered_objects = opts.get_ordered_objects()
     if request.POST.get('post'):
         if all_valid(formsets):
             for formset in formsets:
@@ -98,12 +97,11 @@ def edit_permissions(modeladmin, request, queryset):
         return HttpResponseRedirect(request.get_full_path())
 
     context = {
-        'errors': ActionErrorList(formsets),
+        # 'errors': ActionErrorList(formsets),
         'title': ugettext('Permissions for %s') % force_text(opts.verbose_name_plural),
         'inline_admin_formsets': inline_admin_formsets,
         'app_label': app_label,
         'change': True,
-        'ordered_objects': ordered_objects,
         'form_url': mark_safe(''),
         'opts': opts,
         'target_opts': queryset.model._meta,
